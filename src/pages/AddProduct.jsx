@@ -361,7 +361,7 @@ function AddProduct() {
 
                     <span>JPG, PNG or WebP</span>
                     <span>Maximum 2 MB</span>
-                    <span>Portrait 9:16 or narrower</span>
+                    <span>Displayed in a 9:16 frame for customers</span>
                   </div>
                 )}
 
