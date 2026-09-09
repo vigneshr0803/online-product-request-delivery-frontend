@@ -84,28 +84,10 @@ function AddProduct() {
       return;
     }
 
-    const image = new Image();
     const objectUrl = URL.createObjectURL(file);
 
-    image.onload = () => {
-      const ratio = image.width / image.height;
-
-      if (ratio > 9 / 16) {
-        setImageError("Image must be portrait with a 9:16 ratio or narrower.");
-        URL.revokeObjectURL(objectUrl);
-        return;
-      }
-
-      setImageFile(file);
-      setImagePreview(objectUrl);
-    };
-
-    image.onerror = () => {
-      setImageError("Unable to read the selected image.");
-      URL.revokeObjectURL(objectUrl);
-    };
-
-    image.src = objectUrl;
+    setImageFile(file);
+    setImagePreview(objectUrl);
   };
 
   const handleChange = (event) => {
