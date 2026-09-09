@@ -9,6 +9,7 @@ function Register() {
   const [formData, setFormData] = useState({
     fullName: "",
     mobile: "",
+    email: "",
     password: "",
     address: "",
   });
@@ -19,7 +20,6 @@ function Register() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setMessage("");
     setLoading(true);
 
@@ -50,6 +50,7 @@ function Register() {
       navigate("/verify-otp", {
         state: {
           mobile: formData.mobile,
+          email: formData.email,
         },
       });
     } catch (error) {
@@ -71,7 +72,6 @@ function Register() {
 
       {/* Left side */}
       <section className="register-brand">
-
         <div className="customer-brand-logo">
           🛒
         </div>
@@ -115,12 +115,10 @@ function Register() {
           </div>
 
         </div>
-
       </section>
 
       {/* Form */}
       <section className="register-container">
-
         <div className="register-card">
 
           <div className="register-icon">
@@ -135,6 +133,7 @@ function Register() {
 
           <form onSubmit={handleSubmit}>
 
+            {/* Full Name */}
             <div className="form-group">
               <label htmlFor="full-name">
                 Full Name
@@ -151,6 +150,7 @@ function Register() {
               />
             </div>
 
+            {/* Mobile Number */}
             <div className="form-group">
               <label htmlFor="register-mobile">
                 Mobile Number
@@ -167,6 +167,24 @@ function Register() {
               />
             </div>
 
+            {/* Email */}
+            <div className="form-group">
+              <label htmlFor="register-email">
+                Email Address
+              </label>
+
+              <input
+                id="register-email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email address"
+                required
+              />
+            </div>
+
+            {/* Password */}
             <div className="form-group">
               <label htmlFor="register-password">
                 Password
@@ -183,6 +201,7 @@ function Register() {
               />
             </div>
 
+            {/* Confirm Password */}
             <div className="form-group">
               <label htmlFor="confirm-password">
                 Re-enter Password
@@ -200,6 +219,7 @@ function Register() {
               />
             </div>
 
+            {/* Password match message */}
             {confirmPassword && (
               <div
                 className={`password-match ${formData.password === confirmPassword
@@ -213,6 +233,7 @@ function Register() {
               </div>
             )}
 
+            {/* Delivery Address */}
             <div className="form-group">
               <label htmlFor="register-address">
                 Delivery Address
@@ -228,6 +249,7 @@ function Register() {
               />
             </div>
 
+            {/* Error message */}
             {message && (
               <div className="customer-login-error">
                 <span>⚠</span>
@@ -235,13 +257,14 @@ function Register() {
               </div>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               className="register-submit-button"
               disabled={loading}
             >
               {loading
-                ? "Creating Account..."
+                ? "Sending OTP..."
                 : "Create Account"}
             </button>
 
@@ -260,7 +283,6 @@ function Register() {
           </button>
 
         </div>
-
       </section>
 
     </div>

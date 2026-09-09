@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/Register";
 import VerifyOtp from "./pages/VerifyOtp";
 import Login from "./pages/Login";
@@ -30,7 +30,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={<h1>Online Product Request & Delivery</h1>}
+          element={<Navigate to="/login" replace />}
         />
 
         <Route

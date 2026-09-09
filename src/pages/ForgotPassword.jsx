@@ -4,32 +4,28 @@ import API_URL from "../config/api";
 import "../styles/auth.css";
 
 function ForgotPassword() {
-
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
 
-  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
 
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const sendOtp = async (event) => {
-
     event.preventDefault();
 
     setMessage("");
     setLoading(true);
 
     try {
-
       const response = await fetch(
-        `${API_URL}/api/auth/forgot-password?mobile=${encodeURIComponent(mobile)}`,
+        `${API_URL}/api/auth/forgot-password?email=${encodeURIComponent(email)}`,
         {
           method: "POST",
         }
@@ -60,26 +56,26 @@ function ForgotPassword() {
       );
 
       setStep(2);
-
     } catch (error) {
       console.error("Forgot password OTP error:", error);
       setMessage(error.message || "Failed to send OTP");
-
     } finally {
-
       setLoading(false);
     }
   };
 
   const verifyOtp = async (event) => {
-
     event.preventDefault();
+
+    if (!/^\d{6}$/.test(otp)) {
+      setMessage("Please enter a valid 6-digit OTP.");
+      return;
+    }
 
     setMessage("");
     setLoading(true);
 
     try {
-
       const response = await fetch(
         `${API_URL}/api/auth/forgot-password/verify-otp`,
         {
@@ -88,7 +84,7 @@ function ForgotPassword() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            mobile,
+            email,
             otp,
           }),
         }
@@ -97,24 +93,21 @@ function ForgotPassword() {
       const data = await response.text();
 
       if (!response.ok) {
-        throw new Error(data);
+        throw new Error(data || "OTP verification failed");
       }
 
       setStep(3);
       setMessage("");
-
     } catch (error) {
-
-      setMessage(error.message);
-
+      setMessage(
+        error.message || "OTP verification failed. Please try again."
+      );
     } finally {
-
       setLoading(false);
     }
   };
 
   const resetPassword = async (event) => {
-
     event.preventDefault();
 
     if (newPassword !== confirmPassword) {
@@ -126,7 +119,6 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-
       const response = await fetch(
         `${API_URL}/api/auth/reset-password`,
         {
@@ -135,7 +127,7 @@ function ForgotPassword() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            mobile,
+            email,
             newPassword,
           }),
         }
@@ -144,7 +136,7 @@ function ForgotPassword() {
       const data = await response.text();
 
       if (!response.ok) {
-        throw new Error(data);
+        throw new Error(data || "Password reset failed");
       }
 
       navigate("/login", {
@@ -154,52 +146,49 @@ function ForgotPassword() {
             "Password reset successfully. Please log in.",
         },
       });
-
     } catch (error) {
-
-      setMessage(error.message);
-
+      setMessage(
+        error.message || "Password reset failed. Please try again."
+      );
     } finally {
-
       setLoading(false);
     }
   };
 
   return (
     <div className="auth-page">
-
       <div className="customer-login-card">
 
         <div className="customer-login-icon">
           🔐
         </div>
 
+        {/* STEP 1 - EMAIL */}
         {step === 1 && (
           <>
             <h2>Reset your password</h2>
 
             <p className="customer-login-subtitle">
-              Enter your registered mobile number.
+              Enter your registered email address.
             </p>
 
             <form onSubmit={sendOtp}>
 
               <div className="form-group">
-
-                <label>
-                  Mobile Number
+                <label htmlFor="forgot-email">
+                  Email Address
                 </label>
 
                 <input
-                  type="tel"
-                  value={mobile}
+                  id="forgot-email"
+                  type="email"
+                  value={email}
                   onChange={(event) =>
-                    setMobile(event.target.value)
+                    setEmail(event.target.value)
                   }
-                  placeholder="Enter your mobile number"
+                  placeholder="Enter your email address"
                   required
                 />
-
               </div>
 
               {message && (
@@ -222,39 +211,43 @@ function ForgotPassword() {
           </>
         )}
 
+        {/* STEP 2 - OTP */}
         {step === 2 && (
           <>
             <h2>Verify OTP</h2>
 
             <p className="customer-login-subtitle">
-              Enter the OTP sent to {mobile}.
+              Enter the 6-digit OTP sent to
+            </p>
+
+            <p className="otp-mobile">
+              {email}
             </p>
 
             <form onSubmit={verifyOtp}>
 
               <div className="form-group">
-
-                <label>
-                  OTP
+                <label htmlFor="forgot-otp">
+                  Verification Code
                 </label>
 
                 <input
+                  id="forgot-otp"
                   type="text"
                   inputMode="numeric"
+                  autoComplete="one-time-code"
                   maxLength={6}
                   value={otp}
                   onChange={(event) =>
                     setOtp(
-                      event.target.value.replace(
-                        /\D/g,
-                        ""
-                      )
+                      event.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 6)
                     )
                   }
                   placeholder="Enter 6-digit OTP"
                   required
                 />
-
               </div>
 
               {message && (
@@ -266,7 +259,7 @@ function ForgotPassword() {
               <button
                 type="submit"
                 className="customer-login-button"
-                disabled={loading}
+                disabled={loading || otp.length !== 6}
               >
                 {loading
                   ? "Verifying..."
@@ -277,6 +270,7 @@ function ForgotPassword() {
           </>
         )}
 
+        {/* STEP 3 - NEW PASSWORD */}
         {step === 3 && (
           <>
             <h2>Create new password</h2>
@@ -288,50 +282,44 @@ function ForgotPassword() {
             <form onSubmit={resetPassword}>
 
               <div className="form-group">
-
-                <label>
+                <label htmlFor="new-password">
                   New Password
                 </label>
 
                 <input
+                  id="new-password"
                   type="password"
                   value={newPassword}
                   onChange={(event) =>
-                    setNewPassword(
-                      event.target.value
-                    )
+                    setNewPassword(event.target.value)
                   }
                   placeholder="Enter new password"
                   required
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label>
+                <label htmlFor="confirm-new-password">
                   Re-enter Password
                 </label>
 
                 <input
+                  id="confirm-new-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(event) =>
-                    setConfirmPassword(
-                      event.target.value
-                    )
+                    setConfirmPassword(event.target.value)
                   }
                   placeholder="Re-enter new password"
                   required
                 />
-
               </div>
 
               {confirmPassword && (
                 <div
                   className={`password-match ${newPassword === confirmPassword
-                    ? "valid"
-                    : "invalid"
+                      ? "valid"
+                      : "invalid"
                     }`}
                 >
                   {newPassword === confirmPassword

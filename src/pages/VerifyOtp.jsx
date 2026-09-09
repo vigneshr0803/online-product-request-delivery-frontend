@@ -8,6 +8,7 @@ function VerifyOtp() {
   const navigate = useNavigate();
 
   const mobile = location.state?.mobile || "";
+  const email = location.state?.email || "";
 
   const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
@@ -24,10 +25,13 @@ function VerifyOtp() {
         switch (data.message.toLowerCase()) {
           case "otp expired":
             return "Your OTP has expired. Please request a new OTP.";
+
           case "invalid otp":
             return "The OTP you entered is incorrect. Please check it and try again.";
+
           case "otp already used":
             return "This OTP has already been used. Please request a new OTP.";
+
           default:
             return data.message;
         }
@@ -81,10 +85,12 @@ function VerifyOtp() {
       }
 
       const text = await response.text();
-      let successMessage = "Your mobile number has been verified successfully.";
+
+      let successMessage = "Your email has been verified successfully.";
 
       try {
         const data = JSON.parse(text);
+
         if (data?.message) {
           successMessage = data.message;
         }
@@ -111,27 +117,36 @@ function VerifyOtp() {
   };
 
   const handleOtpChange = (event) => {
-    const value = event.target.value.replace(/\D/g, "").slice(0, 6);
+    const value = event.target.value
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
     setOtp(value);
   };
 
   return (
     <div className="auth-page">
       <div className="auth-card otp-card">
-        <div className="auth-icon">🔐</div>
 
-        <h1>Verify your mobile number</h1>
+        <div className="auth-icon">📧</div>
+
+        <h1>Verify your email address</h1>
 
         <p className="auth-subtitle">
           Enter the 6-digit verification code sent to
         </p>
 
-        <p className="otp-mobile">
-          +91 {mobile}
-        </p>
+        {email && (
+          <p className="otp-mobile">
+            {email}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="auth-form">
-          <label htmlFor="otp">Verification code</label>
+
+          <label htmlFor="otp">
+            Verification code
+          </label>
 
           <input
             id="otp"
@@ -151,8 +166,9 @@ function VerifyOtp() {
             className="auth-button"
             disabled={loading || otp.length !== 6}
           >
-            {loading ? "Verifying..." : "Verify OTP"}
+            {loading ? "Verifying..." : "Verify Email"}
           </button>
+
         </form>
 
         {message && (
@@ -182,6 +198,7 @@ function VerifyOtp() {
         <p className="auth-footer">
           Never share your OTP with anyone.
         </p>
+
       </div>
     </div>
   );

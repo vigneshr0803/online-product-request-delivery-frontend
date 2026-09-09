@@ -6,7 +6,7 @@ import "../styles/auth.css";
 function Login() {
   const navigate = useNavigate();
 
-  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ function Login() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            mobile,
+            email,
             password,
           }),
         }
@@ -47,7 +47,7 @@ function Login() {
         throw new Error(
           typeof data === "string"
             ? data
-            : data.message || "Invalid mobile number or password"
+            : data.message || "Invalid email or password"
         );
       }
 
@@ -141,24 +141,26 @@ function Login() {
 
           <form onSubmit={handleSubmit}>
 
+            {/* Email */}
             <div className="form-group">
-              <label htmlFor="customer-mobile">
-                Mobile Number
+              <label htmlFor="customer-email">
+                Email Address
               </label>
 
               <input
-                id="customer-mobile"
-                type="tel"
-                value={mobile}
+                id="customer-email"
+                type="email"
+                value={email}
                 onChange={(event) =>
-                  setMobile(event.target.value)
+                  setEmail(event.target.value)
                 }
-                placeholder="+91 9876543210"
-                autoComplete="tel"
+                placeholder="Enter your email address"
+                autoComplete="email"
                 required
               />
             </div>
 
+            {/* Password */}
             <div className="form-group">
               <label htmlFor="customer-password">
                 Password
