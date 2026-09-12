@@ -25,8 +25,8 @@ function EditProduct() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [imageError, setImageError] = useState("");
 
   useEffect(() => {
@@ -56,8 +56,15 @@ function EditProduct() {
         active: data.active ?? true,
       });
 
-      setImagePreview(
-        data.imageUrl ? getImageUrl(data.imageUrl) : ""
+      const existingImageUrls =
+        Array.isArray(data.imageUrls) && data.imageUrls.length > 0
+          ? data.imageUrls
+          : data.imageUrl
+            ? [data.imageUrl]
+            : [];
+
+      setImagePreviews(
+        existingImageUrls.map((url) => getImageUrl(url))
       );
     } catch (error) {
       setMessage(error.message);
@@ -94,30 +101,56 @@ function EditProduct() {
   };
 
   const handleImageChange = (event) => {
-    const file = event.target.files?.[0];
+    const selectedFiles = Array.from(event.target.files || []);
 
-    if (!file) {
+    if (selectedFiles.length === 0) {
       return;
     }
 
     setImageError("");
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-
-    if (!allowedTypes.includes(file.type)) {
-      setImageError("Only JPG, PNG and WebP images are allowed.");
+    if (selectedFiles.length > 3) {
+      setImageError("You can select a maximum of 3 images.");
+      event.target.value = "";
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      setImageError("Image must be less than or equal to 2 MB.");
-      return;
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    const validFiles = [];
+
+    for (const file of selectedFiles) {
+      if (!allowedTypes.includes(file.type)) {
+        setImageError(
+          "Only JPG, PNG and WebP images are allowed."
+        );
+        event.target.value = "";
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        setImageError(
+          `Image "${file.name}" must be less than or equal to 2 MB.`
+        );
+        event.target.value = "";
+        return;
+      }
+
+      validFiles.push(file);
     }
 
-    const objectUrl = URL.createObjectURL(file);
+    const newPreviews = validFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
 
-    setImageFile(file);
-    setImagePreview(objectUrl);
+    setImageFiles(validFiles);
+    setImagePreviews(newPreviews);
+
+    event.target.value = "";
   };
 
   const handleChange = (event) => {
@@ -151,9 +184,9 @@ function EditProduct() {
     multipart.append("categoryId", formData.categoryId);
     multipart.append("active", formData.active);
 
-    if (imageFile) {
-      multipart.append("image", imageFile);
-    }
+    imageFiles.forEach((file) => {
+      multipart.append("images", file);
+    });
 
     try {
       const response = await fetch(
@@ -357,87 +390,134 @@ function EditProduct() {
               <div className="admin-form-section-icon orange">🖼️</div>
 
               <div>
-                <h2>Product Image</h2>
+                <h2>Product Images</h2>
 
-                <p>Keep the current image or upload a new one.</p>
+                <p>
+                  Upload up to 3 images for this product.
+                </p>
               </div>
             </div>
 
             <div className="admin-edit-image-area">
-              <label
-                className={`admin-image-upload-box ${imageError ? "has-error" : ""}`}
-              >
-                {imagePreview ? (
-                  <>
+
+              <div className="admin-image-preview-grid">
+
+                {imagePreviews.map((preview, index) => (
+                  <div
+                    className="admin-image-preview-card"
+                    key={`${preview}-${index}`}
+                  >
                     <img
-                      src={imagePreview}
-                      alt={formData.name || "Product"}
+                      src={preview}
+                      alt={`${formData.name || "Product"} ${index + 1}`}
                       className="admin-image-preview"
                     />
 
-                    <div className="image-change-overlay">
-                      <span>✏️</span>
+                    {imageFiles.length > 0 && (
+                      <button
+                        type="button"
+                        className="admin-image-remove-button"
+                        onClick={() => {
+                          URL.revokeObjectURL(imagePreviews[index]);
+
+                          setImageFiles((currentFiles) =>
+                            currentFiles.filter(
+                              (_, fileIndex) => fileIndex !== index
+                            )
+                          );
+
+                          setImagePreviews((currentPreviews) =>
+                            currentPreviews.filter(
+                              (_, previewIndex) =>
+                                previewIndex !== index
+                            )
+                          );
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+
+                    <span className="admin-image-number">
+                      Image {index + 1}
+                    </span>
+                  </div>
+                ))}
+
+                {imageFiles.length === 0 || imagePreviews.length < 3 ? (
+                  <label className="admin-image-add-card">
+
+                    <div className="admin-upload-placeholder">
+                      <div className="admin-upload-icon">＋</div>
+
                       <strong>
-                        {imageFile ? "Change New Image" : "Change Image"}
+                        {imagePreviews.length === 0
+                          ? "Add product images"
+                          : "Replace images"}
                       </strong>
+
+                      <span>
+                        Select 1–3 images
+                      </span>
+
+                      <span>JPG, PNG or WebP</span>
+
+                      <span>Maximum 2 MB each</span>
+
+                      <span>Any aspect ratio</span>
                     </div>
-                  </>
-                ) : (
-                  <div className="admin-upload-placeholder">
-                    <div className="admin-upload-icon">🖼️</div>
 
-                    <strong>Click to upload image</strong>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      onChange={handleImageChange}
+                      hidden
+                    />
 
-                    <span>JPG, PNG or WebP</span>
+                  </label>
+                ) : null}
 
-                    <span>Maximum 2 MB</span>
-
-                    <span>Displayed in a 9:16 frame for customers</span>
-                  </div>
-                )}
-
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleImageChange}
-                  hidden
-                />
-              </label>
-
-              <div className="admin-edit-image-info">
-                {!imageFile && imagePreview && (
-                  <div className="existing-image-info">
-                    <span className="info-icon">✓</span>
-
-                    <div>
-                      <strong>Current image</strong>
-
-                      <small>
-                        No new image selected. The current image will be kept.
-                      </small>
-                    </div>
-                  </div>
-                )}
-
-                {imageFile && !imageError && (
-                  <div className="admin-image-ready">
-                    <span>✓</span>
-
-                    <div>
-                      <strong>New image selected</strong>
-
-                      <small>{imageFile.name}</small>
-                    </div>
-                  </div>
-                )}
-
-                {imageError && (
-                  <div className="admin-image-error">
-                    <span>!</span>
-                    {imageError}
-                  </div>
-                )}
               </div>
+
+              {imageFiles.length > 0 && !imageError && (
+                <div className="admin-image-ready">
+                  <span>✓</span>
+
+                  <div>
+                    <strong>
+                      {imageFiles.length} new image
+                      {imageFiles.length === 1 ? "" : "s"} selected
+                    </strong>
+
+                    <small>
+                      Saving will replace the current product images.
+                    </small>
+                  </div>
+                </div>
+              )}
+
+              {imageFiles.length === 0 && imagePreviews.length > 0 && (
+                <div className="admin-image-ready">
+                  <span>✓</span>
+
+                  <div>
+                    <strong>Current product images</strong>
+
+                    <small>
+                      Select new images above to replace them.
+                    </small>
+                  </div>
+                </div>
+              )}
+
+              {imageError && (
+                <div className="admin-image-error">
+                  <span>!</span>
+                  {imageError}
+                </div>
+              )}
+
             </div>
           </section>
 

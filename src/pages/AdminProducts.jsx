@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API_URL from "../config/api";
 import "../styles/admin.css";
 import AdminNavbar from "../components/AdminNavbar";
-import ProductImage from "../components/ProductImage";
+import ProductImageSlider from "../components/ProductImageSlider";
 
 function AdminProducts() {
   const navigate = useNavigate();
@@ -277,7 +277,8 @@ function AdminProducts() {
               return (
                 <article className="admin-product-card" key={product.id}>
                   <div className="admin-product-image">
-                    <ProductImage
+                    <ProductImageSlider
+                      imageUrls={product.imageUrls}
                       imageUrl={product.imageUrl}
                       alt={product.name}
                     />

@@ -1432,9 +1432,103 @@
 .admin-image-upload-area {
   display: flex;
 
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
 
   gap: 24px;
+}
+
+.admin-image-preview-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.admin-image-preview-card,
+.admin-image-add-card {
+  position: relative;
+
+  min-width: 0;
+  height: 260px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border: 2px dashed #94a3b8;
+  border-radius: 14px;
+
+  background: var(--background);
+}
+
+.admin-image-add-card {
+  cursor: pointer;
+
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.admin-image-add-card:hover {
+  border-color: var(--primary);
+
+  background: var(--surface-hover);
+}
+
+.admin-image-preview-card {
+  border-style: solid;
+}
+
+.admin-image-preview-card .admin-image-preview {
+  width: 100%;
+  height: 100%;
+}
+
+.admin-image-remove-button {
+  position: absolute;
+
+  top: 10px;
+  right: 10px;
+
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(15, 23, 42, 0.78);
+  color: white;
+
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.admin-image-remove-button:hover {
+  background: var(--danger);
+}
+
+.admin-image-number {
+  position: absolute;
+
+  left: 10px;
+  bottom: 10px;
+
+  padding: 5px 8px;
+
+  border-radius: 6px;
+
+  background: rgba(15, 23, 42, 0.78);
+  color: white;
+
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .admin-image-upload-box {
@@ -1792,6 +1886,17 @@
   .admin-image-upload-area {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-image-preview-grid {
+    width: 100%;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-image-preview-card,
+  .admin-image-add-card {
+    height: 220px;
   }
 
   .admin-image-upload-box {
@@ -2689,6 +2794,117 @@
 
 [data-theme="dark"] .existing-image-info strong {
   color: #93c5fd;
+}
+
+/* =========================================================
+   ADD CATEGORY
+   ========================================================= */
+
+.admin-add-category-page {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+.admin-add-category-content {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 38px 28px 55px;
+}
+
+.admin-category-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-category-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.admin-category-fields .admin-form-group {
+  width: 100%;
+}
+
+.admin-category-fields input,
+.admin-category-fields textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--input-background);
+  color: var(--text);
+
+  font-size: 0.88rem;
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-category-fields input {
+  min-height: 46px;
+}
+
+.admin-category-fields textarea {
+  min-height: 125px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.admin-category-fields input::placeholder,
+.admin-category-fields textarea::placeholder {
+  color: #94a3b8;
+}
+
+.admin-category-fields input:focus,
+.admin-category-fields textarea:focus {
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 4px rgba(22, 101, 52, 0.1);
+}
+
+.admin-category-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-category-form-actions .admin-cancel-button,
+.admin-category-form-actions .admin-create-product-button {
+  min-height: 42px;
+  padding: 10px 16px;
+}
+
+@media (max-width: 700px) {
+  .admin-add-category-content {
+    padding: 28px 16px 40px;
+  }
+
+  .admin-category-form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .admin-category-form-actions button {
+    width: 100%;
+  }
+}
+
+/* Dark mode */
+
+[data-theme="dark"] .admin-category-fields input::placeholder,
+[data-theme="dark"] .admin-category-fields textarea::placeholder {
+  color: #64748b;
 }
 
 [data-theme="dark"] .admin-form-section-icon.green {

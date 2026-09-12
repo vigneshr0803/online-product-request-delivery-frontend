@@ -69,40 +69,142 @@ function AddCategory() {
   };
 
   return (
-    <div>
+    <div className="admin-add-category-page">
       <AdminNavbar />
-      <h1>Add Category</h1>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Category Name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+      <main className="admin-add-category-content">
+        <div className="admin-form-page-header">
+          <div>
+            <span className="admin-page-eyebrow">
+              INVENTORY MANAGEMENT
+            </span>
 
-        <textarea
-          name="description"
-          placeholder="Category Description"
-          value={formData.description}
-          onChange={handleChange}
-        />
+            <h1>Add Category</h1>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Add Category"}
-        </button>
-      </form>
+            <p>
+              Create a category to organize your products.
+            </p>
+          </div>
 
-      {message && <p>{message}</p>}
+          <button
+            type="button"
+            className="admin-back-button"
+            onClick={() => navigate("/admin/products/add")}
+          >
+            ← Back to Add Product
+          </button>
+        </div>
 
-      <button
-        type="button"
-        onClick={() => navigate("/admin/products/add")}
-      >
-        Back to Add Product
-      </button>
+        {message && (
+          <div
+            className={
+              message.toLowerCase().includes("success")
+                ? "admin-form-success"
+                : "admin-form-error"
+            }
+          >
+            <span>
+              {message.toLowerCase().includes("success")
+                ? "✓"
+                : "!"}
+            </span>
+
+            <p>{message}</p>
+          </div>
+        )}
+
+        <form
+          className="admin-category-form"
+          onSubmit={handleSubmit}
+        >
+          <section className="admin-form-card">
+            <div className="admin-form-card-header">
+              <div className="admin-form-section-icon blue">
+                🗂️
+              </div>
+
+              <div>
+                <h2>Category Information</h2>
+
+                <p>
+                  Enter the basic details for your new category.
+                </p>
+              </div>
+            </div>
+
+            <div className="admin-category-fields">
+              <div className="admin-form-group">
+                <label htmlFor="category-name">
+                  Category Name
+                </label>
+
+                <input
+                  id="category-name"
+                  type="text"
+                  name="name"
+                  placeholder="e.g. Papad, Snacks, Beverages"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+
+                <span className="admin-form-hint">
+                  Choose a short and clear name customers will
+                  understand.
+                </span>
+              </div>
+
+              <div className="admin-form-group">
+                <label htmlFor="category-description">
+                  Description
+                </label>
+
+                <textarea
+                  id="category-description"
+                  name="description"
+                  placeholder="Describe what products belong to this category..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows="5"
+                />
+
+                <span className="admin-form-hint">
+                  A short description helps you manage your
+                  categories more easily.
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <div className="admin-category-form-actions">
+            <button
+              type="button"
+              className="admin-cancel-button"
+              onClick={() => navigate("/admin/products/add")}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="admin-create-product-button"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="button-spinner"></span>
+                  Creating Category...
+                </>
+              ) : (
+                <>
+                  ＋ Create Category
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </main>
     </div>
   );
 }

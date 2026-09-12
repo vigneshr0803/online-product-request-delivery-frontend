@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ProductImage from "./ProductImage";
+import ProductImageSlider from "./ProductImageSlider";
 
 function ProductCard({ product, onAddToCart }) {
   const [quantity, setQuantity] = useState(1);
@@ -42,10 +42,10 @@ function ProductCard({ product, onAddToCart }) {
   return (
     <div className="product-card">
       <div className="product-image-wrapper">
-        <ProductImage
+        <ProductImageSlider
+          imageUrls={product.imageUrls}
           imageUrl={product.imageUrl}
           alt={product.name}
-          className="product-image"
         />
       </div>
 

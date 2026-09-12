@@ -19,8 +19,8 @@ function AddProduct() {
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [imageError, setImageError] = useState("");
 
   useEffect(() => {
@@ -62,32 +62,68 @@ function AddProduct() {
   };
 
   const handleImageChange = (event) => {
-    const file = event.target.files?.[0];
+    const selectedFiles = Array.from(event.target.files || []);
 
-    if (!file) {
+    if (selectedFiles.length === 0) {
       return;
     }
 
     setImageError("");
-    setImagePreview("");
-    setImageFile(null);
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const remainingSlots = 3 - imageFiles.length;
 
-    if (!allowedTypes.includes(file.type)) {
-      setImageError("Only JPG, PNG and WebP images are allowed.");
+    if (selectedFiles.length > remainingSlots) {
+      setImageError(
+        `You can add a maximum of 3 images. ${remainingSlots} slot${remainingSlots === 1 ? "" : "s"
+        } remaining.`
+      );
+      event.target.value = "";
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      setImageError("Image must be less than or equal to 2 MB.");
-      return;
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    const validFiles = [];
+
+    for (const file of selectedFiles) {
+      if (!allowedTypes.includes(file.type)) {
+        setImageError(
+          "Only JPG, PNG and WebP images are allowed."
+        );
+        event.target.value = "";
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        setImageError(
+          `Image "${file.name}" must be less than or equal to 2 MB.`
+        );
+        event.target.value = "";
+        return;
+      }
+
+      validFiles.push(file);
     }
 
-    const objectUrl = URL.createObjectURL(file);
+    const newPreviews = validFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
 
-    setImageFile(file);
-    setImagePreview(objectUrl);
+    setImageFiles((currentFiles) => [
+      ...currentFiles,
+      ...validFiles,
+    ]);
+
+    setImagePreviews((currentPreviews) => [
+      ...currentPreviews,
+      ...newPreviews,
+    ]);
+
+    event.target.value = "";
   };
 
   const handleChange = (event) => {
@@ -111,8 +147,8 @@ function AddProduct() {
     setLoading(true);
     setMessage("");
 
-    if (!imageFile) {
-      setMessage("Please select a product image.");
+    if (imageFiles.length === 0) {
+      setMessage("Please select at least one product image.");
       setLoading(false);
       return;
     }
@@ -124,7 +160,10 @@ function AddProduct() {
     multipart.append("unit", formDataState.unit);
     multipart.append("availableQuantity", formDataState.availableQuantity);
     multipart.append("categoryId", formDataState.categoryId);
-    multipart.append("image", imageFile);
+
+    imageFiles.forEach((file) => {
+      multipart.append("images", file);
+    });
 
     try {
       const response = await fetch(
@@ -337,48 +376,91 @@ function AddProduct() {
             </div>
 
             <div className="admin-image-upload-area">
-              <label
-                className={`admin-image-upload-box ${imageError ? "has-error" : ""}`}
-              >
-                {imagePreview ? (
-                  <>
+              <div className="admin-image-preview-grid">
+                {imagePreviews.map((preview, index) => (
+                  <div
+                    className="admin-image-preview-card"
+                    key={preview}
+                  >
                     <img
-                      src={imagePreview}
-                      alt="Product preview"
+                      src={preview}
+                      alt={`Product preview ${index + 1}`}
                       className="admin-image-preview"
                     />
 
-                    <div className="image-change-overlay">
-                      <span>✏️</span>
-                      <strong>Change Image</strong>
-                    </div>
-                  </>
-                ) : (
-                  <div className="admin-upload-placeholder">
-                    <div className="admin-upload-icon">🖼️</div>
+                    <button
+                      type="button"
+                      className="admin-image-remove-button"
+                      onClick={() => {
+                        URL.revokeObjectURL(imagePreviews[index]);
 
-                    <strong>Click to upload product image</strong>
+                        setImageFiles((currentFiles) =>
+                          currentFiles.filter(
+                            (_, fileIndex) => fileIndex !== index
+                          )
+                        );
 
-                    <span>JPG, PNG or WebP</span>
-                    <span>Maximum 2 MB</span>
-                    <span>Any aspect ratio</span>
+                        setImagePreviews((currentPreviews) =>
+                          currentPreviews.filter(
+                            (_, previewIndex) =>
+                              previewIndex !== index
+                          )
+                        );
+                      }}
+                    >
+                      ×
+                    </button>
+
+                    <span className="admin-image-number">
+                      Image {index + 1}
+                    </span>
                   </div>
+                ))}
+
+                {imageFiles.length < 3 && (
+                  <label className="admin-image-add-card">
+                    <div className="admin-upload-placeholder">
+                      <div className="admin-upload-icon">＋</div>
+
+                      <strong>
+                        {imageFiles.length === 0
+                          ? "Add product image"
+                          : "Add another image"}
+                      </strong>
+
+                      <span>
+                        {3 - imageFiles.length} slot
+                        {3 - imageFiles.length === 1 ? "" : "s"} remaining
+                      </span>
+
+                      <span>JPG, PNG or WebP</span>
+                      <span>Maximum 2 MB each</span>
+                      <span>Any aspect ratio</span>
+                    </div>
+
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      onChange={handleImageChange}
+                      hidden
+                    />
+                  </label>
                 )}
+              </div>
 
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleImageChange}
-                  hidden
-                />
-              </label>
-
-              {imagePreview && !imageError && (
+              {imageFiles.length > 0 && !imageError && (
                 <div className="admin-image-ready">
                   <span>✓</span>
                   <div>
-                    <strong>Image ready</strong>
-                    <small>{imageFile?.name}</small>
+                    <strong>
+                      {imageFiles.length} image
+                      {imageFiles.length === 1 ? "" : "s"} selected
+                    </strong>
+
+                    <small>
+                      You can add up to 3 images.
+                    </small>
                   </div>
                 </div>
               )}
