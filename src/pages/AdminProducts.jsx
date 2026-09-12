@@ -12,6 +12,7 @@ function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
 
   useEffect(() => {
     loadProducts();
@@ -300,9 +301,29 @@ function AdminProducts() {
                       </span>
                     </div>
 
-                    <p className="admin-product-description">
+                    <div
+                      className={`product-description ${expandedDescriptions[product.id] ? "expanded" : ""
+                        }`}
+                    >
                       {product.description || "No description available."}
-                    </p>
+                    </div>
+
+                    {product.description && product.description.length > 120 && (
+                      <button
+                        type="button"
+                        className="description-toggle"
+                        onClick={() =>
+                          setExpandedDescriptions((prev) => ({
+                            ...prev,
+                            [product.id]: !prev[product.id],
+                          }))
+                        }
+                      >
+                        {expandedDescriptions[product.id]
+                          ? "Show less"
+                          : "Show more"}
+                      </button>
+                    )}
 
                     <div className="admin-product-price">
                       ₹{Number(product.price || 0).toFixed(2)}

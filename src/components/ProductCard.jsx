@@ -3,6 +3,7 @@ import ProductImageSlider from "./ProductImageSlider";
 
 function ProductCard({ product, onAddToCart }) {
   const [quantity, setQuantity] = useState(1);
+  const [showMore, setShowMore] = useState(false);
 
   const increaseQuantity = () => {
     if (quantity < product.availableQuantity) {
@@ -52,7 +53,19 @@ function ProductCard({ product, onAddToCart }) {
       <div className="product-card-content">
         <h2>{product.name}</h2>
 
-        <p className="product-description">{product.description}</p>
+        <div className={`product-description ${showMore ? "expanded" : ""}`}>
+          {product.description}
+        </div>
+
+        {product.description && product.description.length > 120 && (
+          <button
+            type="button"
+            className="description-toggle"
+            onClick={() => setShowMore((prev) => !prev)}
+          >
+            {showMore ? "Show less" : "Show more"}
+          </button>
+        )}
 
         <p className="product-price">
           ₹{product.price} / {product.unit}

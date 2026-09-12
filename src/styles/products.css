@@ -53,10 +53,39 @@
 }
 
 .product-description {
-  min-height: 42px;
-  margin: 0 0 14px;
-  color: var(--muted-text);
-  font-size: 0.92rem;
+  color: #64748b;
+  line-height: 1.55;
+  font-size: 15px;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+
+  transition: all 0.25s ease;
+}
+
+.product-description.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+
+.description-toggle {
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #0f766e;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.description-toggle:hover {
+  text-decoration: underline;
 }
 
 .product-price {
